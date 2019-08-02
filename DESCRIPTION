@@ -1,1 +1,20 @@
+Package: readPos
+Type: Package
+Title: Functions made to work with files delimited by positions
 Version: 0.1.0
+Author: David Morales
+Maintainer: David Morales <dmorales@odec.es>
+Description: Some old softwares uses a set of pre-fixed positions to construct the variables to work. Actually we don't have usefull packages in R to work with this type of files (eg: .dat or .asc non associated with xml).
+    This package contains two main functions that will be help you to construct the variables in the same way that the original definition file did. Each variable in original definition file will be traslated into a column that contains the information of the positions defined in the .csv document that we use as template.
+    The csv must be the following structure, otherwise this functions will not work:
+    	Four first columns (you can add more at the rigth of these four, they will be not used but can help you to add comments or somewhat)
+    		- variables: that column contains the name of the variables to work, the name that you write there will be the colname in R data frame.
+    		- type: specifies the type of the variable, allows "character", "single", "multiple" or "numeric".
+    		- start: positions that starts the range of data that will definie the variable.
+    		- finish: positions that finish the range of data that will definie the variable.
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+Suggests: 
+    testthat
+RoxygenNote: 6.1.1

@@ -9,7 +9,7 @@ readPos(datasource, positions)
 \arguments{
 \item{datasource}{Path of a data file with plain text format (eg: .dat or .asc not associated with a xml)}
 
-\item{positions}{Path of a csv that specifies the name of the variable, type and positions that have information in data file. The csv must be the following structure, otherwise this functions will not work:
+\item{positions}{Path of a csv that specifies the name of the variable, type and positions that have information in data file. The csv must be the following structure, otherwise this function will not work:
 Four first columns (you can add more at the rigth of these four, they will be not used but can help you to add comments or somewhat)
 1 - variables: that column contains the name of the variables to work, the name that you write there will be the colname in R data frame.
 2 - type: specifies the type of the variable, allows "character", "single", "multiple" or "numeric".

@@ -88,8 +88,9 @@ writePos <- function(df,file,positions) {
             newstart <- csv$finish[v] - lendata + 1 
             temp[pp,1] <-paste0(substr(temp[pp,],1,newstart-1),df[pp,v],substr(temp[pp,],csv$finish[v]+1,max)) 
         }
-        else {newend <- csv$start[v] + lendata
+        else {
             lendata <- nchar(df[pp,v])
+            newend <- csv$start[v] + lendata
             temp[pp,1] <- paste0(substr(temp[pp,],1,csv$start[v]-1),df[pp,v],substr(temp[pp,],newend,max)) 
         } 
        }

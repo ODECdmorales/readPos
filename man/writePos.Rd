@@ -30,7 +30,7 @@ readPos(datasource = "C:/Desktop/datum.dat", positions = "C:/Documents/map.csv" 
 
 CSV structure example(headers must be like this): 
 
-   variables,type,start,finish,alignment
+   variable,type,start,finish,alignment
    sex,single,5,6,right
    age,numeric,12,14,
    satisfaction,character,75,100,left

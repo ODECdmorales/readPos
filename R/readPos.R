@@ -16,7 +16,7 @@
 #'
 #' CSV structure example(headers must be like this): 
 #'
-#'    variables,type,start,finish
+#'    variable,type,start,finish
 #'    sex,single,5,6
 #'    age,numeric,12,14
 #'    satisfaction,character,75,100
@@ -63,7 +63,7 @@ readPos <- function(datasource, positions) {
 #'
 #' CSV structure example(headers must be like this): 
 #'
-#'    variables,type,start,finish,alignment
+#'    variable,type,start,finish,alignment
 #'    sex,single,5,6,right
 #'    age,numeric,12,14,
 #'    satisfaction,character,75,100,left
@@ -102,4 +102,50 @@ writePos <- function(df,file,positions) {
 
 
 
+
+
+### READ CARDS ### 
+
+
+#' Function to read a data file defined by positions with disaggregated data by cards and save it in a DF
+#'
+#' @param datasource Path of a data file with plain text format and disaggregated data by cards (eg: .dat or .asc not associated with a xml)
+#' @param positions Path of a csv that specifies the name of the variable, type and positions that have information in data file. The csv must be the following structure, otherwise this function will not work:
+#'    Four first columns (you can add more at the rigth of these four, they will be not used but can help you to add comments or somewhat)
+#'    1 - variables: that column contains the name of the variables to work, the name that you write there will be the colname in R data frame.
+#'    2 - type: specifies the type of the variable, allows "character", "single", "multiple" or "numeric".
+#'    3 - start: positions that starts the range of data that will definie the variable.
+#'    4 - finish: positions that finish the range of data that will definie the variable.
+#'    5 - card: number of card where data's variable is allowed. Should be numeric value (eg: "2" when the variable is in the second line of each card. In file of 5 cards it will the following rows: 2,6,11,16...)
+#' @param ncards Number of cards of the file. Eg: when a file have 6 lines for each interviwed (register) the number of cards will be 6. Integer values allowed only.
+#' @return A data frame with as many columns as rows have the csv (with their "variable" names) and as many rows as rows have the data file.
+#' @examples
+#' readPos(datasource = "C:/Desktop/datum.dat", positions = "C:/Documents/map.csv" )
+#'
+#' CSV structure example(headers must be like this): 
+#'
+#'    variable,type,start,finish,card
+#'    sex,single,5,6,1
+#'    age,numeric,12,14,1
+#'    satisfaction,character,4,7,3
+#'
+#' @export
+
+
+readCards <- function(datasource,positions,ncards) {
+  
+  csv <- read.csv(positions)
+  finalrows = nrow(read.delim(datasource, header=FALSE, sep="ç")) / ncards
+  df <-  as.matrix(data.frame(matrix("", ncol = nrow(csv), nrow = finalrows )))
+  colnames(df) <- csv$variable
+  for (i in 1:nrow(csv))  {
+    temp <- as.matrix(read.fwf(datasource,  widths = c(csv$start[i],(csv$finish[i] - csv$start[i])),header=FALSE, sep = "\t")[2])
+    for (uu in 1:finalrows) {
+      df[uu,i] <- temp[(uu*ncards)-ncards+csv$cards[i]]
+    }
+  }  
+  
+  return(df) 
+  
+}
 

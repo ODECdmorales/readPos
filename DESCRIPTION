@@ -12,6 +12,7 @@ Description: Some old softwares uses a set of pre-fixed positions to construct t
     		- type: specifies the type of the variable, allows "character", "single", "multiple" or "numeric".
     		- start: positions that starts the range of data that will definie the variable.
     		- finish: positions that finish the range of data that will definie the variable.
+Imports:readtext
 License: GPL-2
 Encoding: UTF-8
 LazyData: true

@@ -13,7 +13,7 @@ writePos(df, file, positions)
 
 \item{positions}{Path of a csv that specifies the name of the variable, type and positions where data will be stored in data file. The csv must be the following structure, otherwise this function will not work:
 Four five columns (you can add more at the rigth of these four, they will be not used but can help you to add comments or somewhat)
-1 - variables: that column contains the name of the variables to write. Text written here must match with some column name of the data frame.
+1 - variables: that column contains the name of the variables to write. Text written here must match with some column name of the data frame. Names don't allow blank spaces, you must replace it with other character.
 2 - type: specifies the type of the variable, allows "character", "single", "multiple" or "numeric".
 3 - start: positions that starts the range of data that will definie the variable.
 4 - finish: positions that finish the range of data that will definie the variable.

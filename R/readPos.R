@@ -6,7 +6,7 @@
 #' @param datasource Path of a data file with plain text format (eg: .dat or .asc not associated with a xml)
 #' @param positions Path of a csv that specifies the name of the variable, type and positions that have information in data file. The csv must be the following structure, otherwise this function will not work:
 #'    Four first columns (you can add more at the rigth of these four, they will be not used but can help you to add comments or somewhat)
-#'    1 - variables: that column contains the name of the variables to work, the name that you write there will be the colname in R data frame.
+#'    1 - variables: that column contains the name of the variables to work, the name that you write there will be the colname in R data frame. Names don't allow blank spaces, you must replace it with other character.
 #'    2 - type: specifies the type of the variable, allows "character", "single", "multiple" or "numeric".
 #'    3 - start: positions that starts the range of data that will definie the variable.
 #'    4 - finish: positions that finish the range of data that will definie the variable.
@@ -52,7 +52,7 @@ readPos <- function(datasource, positions) {
 #' @param file Path with the name of the file that will be generated. 
 #' @param positions Path of a csv that specifies the name of the variable, type and positions where data will be stored in data file. The csv must be the following structure, otherwise this function will not work:
 #'    Four five columns (you can add more at the rigth of these four, they will be not used but can help you to add comments or somewhat)
-#'    1 - variables: that column contains the name of the variables to write. Text written here must match with some column name of the data frame.
+#'    1 - variables: that column contains the name of the variables to write. Text written here must match with some column name of the data frame. Names don't allow blank spaces, you must replace it with other character.
 #'    2 - type: specifies the type of the variable, allows "character", "single", "multiple" or "numeric".
 #'    3 - start: positions that starts the range of data that will definie the variable.
 #'    4 - finish: positions that finish the range of data that will definie the variable.
@@ -112,7 +112,7 @@ writePos <- function(df,file,positions) {
 #' @param datasource Path of a data file with plain text format and disaggregated data by cards (eg: .dat or .asc not associated with a xml)
 #' @param positions Path of a csv that specifies the name of the variable, type and positions that have information in data file. The csv must be the following structure, otherwise this function will not work:
 #'    Four first columns (you can add more at the rigth of these four, they will be not used but can help you to add comments or somewhat)
-#'    1 - variables: that column contains the name of the variables to work, the name that you write there will be the colname in R data frame.
+#'    1 - variables: that column contains the name of the variables to work, the name that you write there will be the colname in R data frame. Names don't allow blank spaces, you must replace it with other character. 
 #'    2 - type: specifies the type of the variable, allows "character", "single", "multiple" or "numeric".
 #'    3 - start: positions that starts the range of data that will definie the variable.
 #'    4 - finish: positions that finish the range of data that will definie the variable.
@@ -145,7 +145,61 @@ readCards <- function(datasource,positions,ncards) {
     }
   }  
   
-  return(df) 
+  return(as.data.frame(df)) 
   
 }
+
+
+
+### STA to MAP ### 
+
+
+#' Function to scan a STA definition file and create a map with the same parameters for each variable
+#'
+#' @param stafile Path of the STA definition file taht will be scanned and being the base to generate de map.csv
+#' @param map Name of the CSV that will be generated
+#' @return A csv with many rows as variable defined in STA file.
+#' @examples
+#' scanSTA(STA = "C:/Desktop/definition.sta", map = "output.csv")
+#'
+#' @export
+
+
+scanSTA <- function(stafile, map) {
+  options( warn = -1 )
+  sta <- as.character(readtext::readtext(stafile))
+  names(sta)[1] <- "kkk"
+  sta <- gsub("END;.*","",sta)
+  sta <- as.data.frame(strsplit(sta,split=";"))
+  csv <- as.matrix(data.frame(matrix("", ncol = 4, nrow = nrow(sta) )))
+  colnames(csv) <- c("variable","type","start","finish")
+  for (i in 1:nrow(sta)) {
+    if (grepl("=", sta[i,]) == TRUE) {
+      # VARIABLE COL
+      csv[i,1] <- gsub(".*=(.+)\\\\:.*", "\\1",sta[i,])
+      #TYPE COL
+                  if (substr(gsub(".*\\:(.+)[[:space:]].*", "\\1", sta[i,1]),1,1) == "C")      {csv[i,2] <- "character"
+                  } else if (substr(gsub(".*\\\\:(.+)[[:space:]].*", "\\1", sta[i,1]),1,1) == "S") {csv[i,2] <- "single"
+                  } else if (substr(gsub(".*\\\\:(.+)[[:space:]].*", "\\1", sta[i,1]),1,1) == "M") {csv[i,2] <- "multiple"
+                  } else if (substr(gsub(".*\\\\:(.+)[[:space:]].*", "\\1", sta[i,1]),1,1) == "I") {csv[i,2] <- "numeric"
+                  } else if (substr(gsub(".*\\\\:(.+)[[:space:]].*", "\\1", sta[i,1]),1,1) == "L") {csv[i,2] <- "logic"}
+      #START AND FINISH COLS   
+                if (grepl("/[00001-99999]", sta[i,1]) == TRUE) {
+                        csv[i,3] <- gsub(".*/(.+)-(.+).*","\\1",sta[i,1])
+                        csv[i,4] <- gsub(".*/(.+)-(.+).*","\\2",sta[i,1])
+                } else if (grepl("#[^CLAS]", sta[i,1]) == TRUE) { 
+                      ii <- paste0(gsub(".*#(.+),.*", "\\1", sta[i,1]),":")
+                      csv[i,3] <- gsub(".*/(.+)-(.+)","\\1",sta[grep(ii, sta[,1])[1],1] )
+                      csv[i,4] <- gsub(".*/(.+)-(.+)","\\2",sta[grep(ii, sta[,1])[1],1] )
+                }
+      
+       } else {csv[i,] <- NA} 
+    
+  }
+ csv[,4] <- gsub("[001-999],.*","",csv[,4]) 
+ csv <- na.omit(csv) 
+ write.csv(csv, file = map, row.names =FALSE, fileEncoding = "UTF-8", quote = FALSE ) 
+ 
+}
+
 

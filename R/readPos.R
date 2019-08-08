@@ -71,33 +71,40 @@ readPos <- function(datasource, positions) {
 #' @export
 
 
+
 writePos <- function(df,file,positions) {
   
-   csv <- read.csv(positions)
-   max <- max(csv$finish)
-   dumblank <- " "
-   for (yt in 1:max) {dumblank <- paste0(dumblank," ")}
-   
-   temp <- data.frame(matrix("", ncol = 1, nrow = nrow(df) ))
-   temp[1] <- dumblank
-   
-   for (v in 1:ncol(df)) {
-       for (pp in 1:nrow(df)) {
-        if (csv$alignment[v] == "right") { 
-            lendata <- nchar(df[pp,v])
-            newstart <- csv$finish[v] - lendata + 1 
-            temp[pp,1] <-paste0(substr(temp[pp,],1,newstart-1),df[pp,v],substr(temp[pp,],csv$finish[v]+1,max)) 
-        }
-        else {
-            lendata <- nchar(df[pp,v])
-            newend <- csv$start[v] + lendata
-            temp[pp,1] <- paste0(substr(temp[pp,],1,csv$start[v]-1),df[pp,v],substr(temp[pp,],newend,max)) 
-        } 
-       }
-   }
+  csv <- read.csv(positions)
+  max <- max(csv$finish)
+  dumblank <- " "
+  for (yt in 1:max) {dumblank <- paste0(dumblank," ")}
   
-   write.table(temp, file, sep=" ", col.names=FALSE,row.names=FALSE, quote=FALSE)
+  temp <- data.frame(matrix("", ncol = 1, nrow = nrow(df) ))
+  temp[1] <- dumblank
+  
+  list<-colnames(df)
+  
+  
+  for (v in 1:nrow(csv)) {
     
+    csvsc<-csv$variable[v]
+    number<-which(list==csvsc)
+    for (pp in 1:nrow(df)) {
+      if (csv$alignment[v] == "right") { 
+        lendata <- nchar(df[pp,number])
+        newstart <- csv$finish[v] - lendata + 1 
+        temp[pp,1] <-paste0(substr(temp[pp,],1,newstart-1),df[pp,number],substr(temp[pp,],csv$finish[v]+1,max)) 
+      }
+      else {
+        lendata <- nchar(df[pp,number])
+        newend <- csv$start[v] + lendata
+        temp[pp,1] <- paste0(substr(temp[pp,],1,csv$start[v]-1),df[pp,number],substr(temp[pp,],newend,max)) 
+      } 
+    }
+  }
+  
+  write.table(temp, file, sep=" ", col.names=FALSE,row.names=FALSE, quote=FALSE)
+  
 }
 
 
@@ -139,13 +146,13 @@ readCards <- function(datasource,positions,ncards) {
   df <-  as.matrix(data.frame(matrix("", ncol = nrow(csv), nrow = finalrows )))
   colnames(df) <- csv$variable
   for (i in 1:nrow(csv))  {
-    temp <- as.matrix(read.fwf(datasource,  widths = c(csv$start[i],(csv$finish[i] - csv$start[i])),header=FALSE, sep = "\t")[2])
+    temp <- as.matrix(read.fwf(datasource,  widths = c(csv$start[i]-1,(csv$finish[i] - csv$start[i])+1),header=FALSE, sep = "\t")[2])
     for (uu in 1:finalrows) {
       df[uu,i] <- temp[(uu*ncards)-ncards+csv$cards[i]]
     }
   }  
-  
-  return(as.data.frame(df)) 
+  df<-as.data.frame(df)
+  return(df) 
   
 }
 
